@@ -1,6 +1,6 @@
 const Question = require("../models/questionModel");
 
-// ✅ Create Question
+//Create Question
 exports.createQuestion = async (req, res) => {
     try {
         const { question_text, quiztype_id, options, correct_answer } = req.body;
@@ -22,7 +22,7 @@ exports.createQuestion = async (req, res) => {
     }
 };
 
-// ✅ Get All Questions with Quiz Type (Using Aggregation)
+//Get All Questions with Quiz Type (Using Aggregation)
 exports.getQuestions = async (req, res) => {
     try {
         const questions = await Question.aggregate([
@@ -50,7 +50,7 @@ exports.getQuestions = async (req, res) => {
     }
 };
 
-// ✅ Get Questions by Quiz Type (Hiding correct_answer)
+//Get Questions by Quiz Type (Hiding correct_answer)
 exports.getQuestionsByQuizType = async (req, res) => {
     try {
         const { quiztype_name } = req.params;
@@ -85,7 +85,7 @@ exports.getQuestionsByQuizType = async (req, res) => {
     }
 };
 
-// ✅ Update Question
+//Update Question
 exports.updateQuestion = async (req, res) => {
     try {
         const { id } = req.params;
@@ -108,7 +108,7 @@ exports.updateQuestion = async (req, res) => {
     }
 };
 
-// ✅ Delete Question
+//Delete Question
 exports.deleteQuestion = async (req, res) => {
     try {
         const { id } = req.params;

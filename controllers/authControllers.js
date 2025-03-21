@@ -73,52 +73,52 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.getUser = async (req, res) => {
+// exports.getUser = async (req, res) => {
   
-  try {
-    const userId = req.user.id;
+//   try {
+//     const userId = req.user.id;
 
-    if (!mongoose.Types.ObjectId.isValid(userId))
-    {
-      return res.status(400).json({ error: 'Invalid user ID format' });
-    }
+//     if (!mongoose.Types.ObjectId.isValid(userId))
+//     {
+//       return res.status(400).json({ error: 'Invalid user ID format' });
+//     }
 
-    const user = await User.aggregate([
-      { $match: { _id: new mongoose.Types.ObjectId(userId) } },
-      {
-        $lookup:
-        {
-          from: "roles",
-          localField: "role_id",
-          foreignField: "_id",
-          as: "roleDetails",
-        },
-      },
-      { $unwind: "$roleDetails" },
-      {
-        $project:
-        {
-          _id: 1,
-          firstname: 1,
-          lastname: 1,
-          email: 1,
-          gender: 1,
-          phone_number: 1,
-          role: "$roleDetails.role_type",
-        },
-      }
-    ]);
+//     const user = await User.aggregate([
+//       { $match: { _id: new mongoose.Types.ObjectId(userId) } },
+//       {
+//         $lookup:
+//         {
+//           from: "roles",
+//           localField: "role_id",
+//           foreignField: "_id",
+//           as: "roleDetails",
+//         },
+//       },
+//       { $unwind: "$roleDetails" },
+//       {
+//         $project:
+//         {
+//           _id: 1,
+//           firstname: 1,
+//           lastname: 1,
+//           email: 1,
+//           gender: 1,
+//           phone_number: 1,
+//           role: "$roleDetails.role_type",
+//         },
+//       }
+//     ]);
 
-    if (!user.length)
-    {
-      return res.status(404).json({ error: 'User not found' });
-    }
+//     if (!user.length)
+//     {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
 
-    res.status(200).json(user[0]);
-  }
-  catch (error)
-  {
-    console.error("User data fetch error:", error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
+//     res.status(200).json(user[0]);
+//   }
+//   catch (error)
+//   {
+//     console.error("User data fetch error:", error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };

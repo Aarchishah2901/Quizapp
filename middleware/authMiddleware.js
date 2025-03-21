@@ -1,26 +1,32 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const mongoose = require("mongoose");
-require('dotenv').config();
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
     console.log("Authorization Header:", authHeader);
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader || !authHeader.startsWith("Bearer "))
+    {
         return res.status(401).json({ message: "Unauthorized: No token provided" });
     }
 
-    const token = authHeader.split(" ")[1]; // Extract token
+    const token = authHeader.split(" ")[1];
     console.log("Extracted Token:", token);
 
-    try {
+    try
+    {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log("Decoded User:", decoded);
 
         req.user = decoded;
         next();
-    } catch (error) {
+    }
+    catch (error)
+    {
         console.error("Token Verification Error:", error);
         return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
@@ -28,39 +34,47 @@ const authMiddleware = (req, res, next) => {
 
 const verifyToken = async (req, res, next) => {
     const token = req.header("Authorization")?.split(' ')[1];
-    if (!token) {
+    if (!token)
+    {
         console.log("No token provided");
         return res.status(401).json({ error: "Access denied, no token provided" });
     }
     
-    try {
+    try
+    {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log("Decoded Token:", decoded);
 
         const user = await User.findById(decoded.id);
-        if (!user) {
+        if (!user)
+        {
             console.log("User not found");
             return res.status(403).json({ error: "User not found" });
         }
 
         req.user = user;
         next();
-    } catch (error) {
+    }
+    catch (error)
+    {
         console.log("Token verification failed", error);
         return res.status(403).json({ error: "Invalid token" });
     }
 };
 
 const checkPermission = (requiredPermission) => async (req, res, next) => {
-    try {
-        if (!req.user || !req.user.id) {
+    try
+    {
+        if (!req.user || !req.user.id)
+        {
             return res.status(401).json({ error: "Unauthorized: No user found in request" });
         }
 
         const user = await User.aggregate([
             { $match: { _id: new mongoose.Types.ObjectId(req.user.id) } },
             {
-                $lookup: {
+                $lookup:
+                {
                     from: "roles",
                     localField: "role_id",
                     foreignField: "_id",
@@ -69,7 +83,8 @@ const checkPermission = (requiredPermission) => async (req, res, next) => {
             },
             { $unwind: "$roleDetails" },
             {
-                $project: {
+                $project:
+                {
                     _id: 1,
                     firstname: 1,
                     lastname: 1,
@@ -80,47 +95,56 @@ const checkPermission = (requiredPermission) => async (req, res, next) => {
             }
         ]);
 
-        if (!user.length) {
+        if (!user.length)
+        {
             return res.status(403).json({ error: "User not found or has no role assigned" });
         }
 
         const userData = user[0];
 
-        if (!userData.permissions.includes(requiredPermission)) {
+        if (!userData.permissions.includes(requiredPermission))
+        {
             return res.status(403).json({ error: "Access denied: Insufficient permissions" });
         }
 
         req.user = userData;
         next();
-    } catch (error) {
+    }
+    catch (error)
+    {
         console.error("Permission Check Error:", error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
 const checkRole = (allowedRoles) => async (req, res, next) => {
-    try {
-        if (!req.user || !req.user.id) {
+    try
+    {
+        if (!req.user || !req.user.id)
+        {
             return res.status(401).json({ error: "Unauthorized: No user found in request" });
         }
 
         const user = await User.aggregate([
             { $match: { _id: new mongoose.Types.ObjectId(req.user.id) } },
             {
-                $lookup: {
+                $lookup:
+                {
                     from: "roles",
                     localField: "role_id",
                     foreignField: "_id",
                     as: "roleDetails"
                 }
             },
-            { $unwind: {
+            { $unwind:
+            {
                 path: "$roleDetails",
                 preserveNullAndEmptyArrays: true
             }
         },
             {
-                $project: {
+                $project:
+                {
                     _id: 1,
                     firstname: 1,
                     lastname: 1,
@@ -130,7 +154,8 @@ const checkRole = (allowedRoles) => async (req, res, next) => {
             }
         ]);
 
-        if (!user.length) {
+        if (!user.length)
+        {
             return res.status(403).json({ error: "User not found or has no role assigned yet" });
         }
 
@@ -142,17 +167,20 @@ const checkRole = (allowedRoles) => async (req, res, next) => {
 
         req.user = userData;
         next();
-    } catch (error) {
+    }
+    catch (error)
+    {
         console.error("Role Check Error:", error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
 const checkAdmin = async (req, res, next) => {
-    if (!req.user.isAdmin) {
+    if (!req.user.isAdmin)
+    {
         return res.status(403).json({ message: "Access denied: Admins only" });
     }
     next();
 };
 
-module.exports = { verifyToken, authMiddleware, checkPermission, checkRole, checkAdmin };
+module.exports = { authMiddleware, verifyToken, checkPermission, checkRole, checkAdmin };

@@ -1,8 +1,10 @@
 const express = require("express");
-const { createQuizType, getQuizTypes, getQuizTypeById, updateQuizType, deleteQuizType} = require("../controllers/quizTypecontroller");
 const authMiddleware  = require("../middleware/authMiddleware");
+const { createQuizType, getQuizTypes, getQuizTypeById, updateQuizType, deleteQuizType} = require("../controllers/quizTypecontroller");
 
 const router = express.Router();
+
+console.log("Auth Middleware Type:", typeof authMiddleware);
 
 router.post("/quiz-types", authMiddleware, createQuizType);
 router.get("/quiz-types", authMiddleware, getQuizTypes);

@@ -6,9 +6,12 @@ exports.createQuizType = async (req,res) => {
     try
     {
         const { quiztype_name } = req.body;
+        console.log("function");
+        
         const existingQuiztpe = await QuizType.findOne({ quiztype_name: req.body.quiztype_name });
-        if ( existingQuiztpe)
+        if ( existingQuiztpe){
             return res.status(400).json({ message: "Quiz type allready exists" });
+        }
 
         const newQuizType = new QuizType({ quiztype_name });
         console.log("New quiz", newQuizType)

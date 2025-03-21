@@ -9,7 +9,27 @@ exports.registerUser = async (req, res) => {
     {
         const { firstname, lastname, email, password, gender, phone_number, role } = req.body;
 
-        const isAdmin = role === "admin";
+        const existingUser = await User.findOne({ email });
+        if (existingUser)
+        {
+            return res.status(400).json({ error: "Email is already registered" });
+        }
+
+        let isAdmin = false;
+        let userRole = "user"; // Default role
+
+        if (role)
+        {
+            if (role === "admin")
+            {
+                isAdmin = true;
+                userRole = "admin";
+            }
+            else if (role !== "user")
+            {
+                return res.status(400).json({ error: "Invalid role. Allowed values: 'admin', 'user'." });
+            }
+        }
 
         const newUser = new User({
             firstname,
@@ -18,6 +38,7 @@ exports.registerUser = async (req, res) => {
             password,
             gender,
             phone_number,
+            role: userRole,
             isAdmin
         });
 
